@@ -1,0 +1,7 @@
+#!/usr/bin/sh
+
+IP= #mettre votre IP
+
+qemu-system-x86_64 --enable-kvm  -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+-device e1000,netdev=net0 -m 6G  -kernel "vmlinuz" -initrd "init.cpio.gz" \
+-append "vga=0x31a type=http url=http://${IP}:8000/gcc-prologin.squashfs"
