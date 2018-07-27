@@ -1,6 +1,6 @@
 #!/usr/bin/sh
 
-IP= #mettre votre IP
+IP=127.0.0.1 #mettre votre IP
 
 qemu-system-x86_64 --enable-kvm  -netdev user,id=net0,hostfwd=tcp::2222-:22 \
 -device e1000,netdev=net0 -m 6G  -kernel "vmlinuz" -initrd "init.cpio.gz" \

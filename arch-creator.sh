@@ -3,8 +3,8 @@
 DEFAULT_IMAGE="${SALT_PREFIX:-"archlinux"}"
 SALT_ENV="${SALT_ENV:-"base"}"
 PILLAR_ENV="${PILLAR_ENV:-"base"}"
-SALT_MASTER="${SALT_MASTER:-"prologin-gcc.pie.cri.epita.net"}"
-ANNOUNCE_URL="http://10.224.4.198:8000/annouce"
+SALT_MASTER="${SALT_MASTER:-"127.0.0.1"}"
+ANNOUNCE_URL="http://127.0.0.1:8000/annouce"
 
 MKSQUASHFS_OPTIONS="-comp xz"
 MKSQUASHFS_OPTIONS_DEBUG="-comp gzip -noI -noD -noF -noX"
@@ -190,6 +190,19 @@ squashfs() {
 	unstep
 }
 
+# arch-chroot does not create a mount point for / by default so the root
+# directory must be already mounted before chrooting in
+mount_bind() {
+	step "Mounting ROOTFS"
+	mount --bind ${ROOTFS_DIR} ${ROOTFS_DIR}
+	unstep
+}
+
+umount_bind() {
+	step "Unmounting ROOTFS"
+	umount ${ROOTFS_DIR}
+	unstep
+}
 
 build() {
 	IMAGE_NAME=${1:-"${DEFAULT_IMAGE}"}
@@ -204,6 +217,7 @@ build() {
 	step "Building ${IMAGE_NAME}..."
 
 	create_dirs
+	mount_bind
 	bootstrap
 	install_salt
 	call_salt
@@ -223,7 +237,7 @@ clean() {
 	fi
 
 	step "Cleaning ${IMAGE_NAME}"
-
+	umount_bind
 	run rm -rf `dirname "${ROOTFS_DIR}"`
 	run rm -rf "${IMAGES_DIR}/${IMAGE_NAME}.squashfs"
 	run rm -rf "${IMAGES_DIR}/${IMAGE_NAME}_*.torrent"
